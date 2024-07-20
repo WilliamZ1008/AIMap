@@ -71,7 +71,7 @@ Thank you for contributing to AIMap!
 -----
 # 🚧Construction Site🚧
 ## TODO🏗️
-* [] Find a way of implementation
+* [✅] Find a way of implementation
 * [] Gather artificial intelligence-related overall knowledge framework
 * [] Add an apparent overall framework to the map
 * [] Gather specific knowledge in breakdowns (teamwork)
