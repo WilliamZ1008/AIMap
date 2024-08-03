@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <array>
+#include <chrono>
+#include <Windows.h>
+
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
@@ -105,6 +108,8 @@ int main(void)
     width = 960;
     height = 540;
 
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     window = glfwCreateWindow(width, height, "AIMap Early Access", NULL, NULL);
     if (!window)
     {
@@ -112,11 +117,16 @@ int main(void)
         return -1;
     }
 
+    int max_width = GetSystemMetrics(SM_CXSCREEN);
+    int max_hieght = GetSystemMetrics(SM_CYSCREEN);
+    glfwSetWindowMonitor(window, NULL, (max_width / 2) - (width / 2), (max_hieght / 2) - (height / 2), width, height, GLFW_DONT_CARE);
+
     isLeftButtonPressed = false;
 
     glfwSetCursorPosCallback(window, CursorPositionCallback);
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetScrollCallback(window, ScrollCallback);
+
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -160,7 +170,6 @@ int main(void)
     Shader shader("res/shaders/chunk.glsl");
     shader.Bind();
 
-
     glm::mat4 proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
     view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
     glm::mat4 model;
@@ -168,7 +177,10 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-
+    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> end;
+    std::chrono::duration<float> elapsed_seconds;
+    float seconds;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -182,7 +194,10 @@ int main(void)
         mvp = proj * view * model;
         shader.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
         shader.SetUniformMat4f("u_MVP", mvp);
-
+        end = std::chrono::system_clock::now();
+        elapsed_seconds = end - start;
+        seconds = elapsed_seconds.count();
+        shader.SetUniform1f("iTime", seconds);
         unsigned int indexCount = 0;
         std::array<Vertex, MaxVertexCount> vertices;
         Vertex* target = vertices.data();
