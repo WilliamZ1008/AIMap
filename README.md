@@ -1,6 +1,8 @@
 # AIMap
 AIMap is an interactive visualization tool designed for Artificial Intelligence-associated knowledge Map visualization.
 
+![image-20240805004015798](res/images/early.gif)
+
 ## Contribution Guidelines
 
 We welcome contributions from the community! By participating in this project, you agree to abide by our code of conduct. Here are the steps to get started:
