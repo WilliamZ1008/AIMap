@@ -134,6 +134,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="CODE_OF_CONDUCT.md" />
+    <None Include="CONTRIBUTING.md" />
     <None Include="Dependencies\GLEW\doc\advanced.html" />
     <None Include="Dependencies\GLEW\doc\basic.html" />
     <None Include="Dependencies\GLEW\doc\build.html" />

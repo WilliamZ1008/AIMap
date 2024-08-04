@@ -444,6 +444,7 @@
       <Filter>头文件</Filter>
     </None>
     <None Include="res\shaders\chunk.glsl" />
+    <None Include="CONTRIBUTING.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dependencies\GLEW\include\GL\eglew.h">
