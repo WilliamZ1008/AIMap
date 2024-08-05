@@ -17,7 +17,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 int width, height;
-double cursorX, cursorY;
+double cursorX, cursorY, scale;
 bool isLeftButtonPressed;
 glm::mat4 view;
 float u_Color[] = { 0.1f, 0.8f, 1.0f };
@@ -28,7 +28,7 @@ struct Vertex{
 
 void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isLeftButtonPressed) {
-        view = glm::translate(view, glm::vec3((xpos - cursorX) * 1.0f, (cursorY - ypos) * 1.0f, 0.0f));
+        view = glm::translate(view, glm::vec3((xpos - cursorX) / scale, (cursorY - ypos) / scale, 0.0f));
         cursorX = xpos;
         cursorY = ypos;
     }
@@ -58,14 +58,15 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         view = glm::translate(view, glm::vec3((cursorX), (height - cursorY), 0.0f));
 		view = glm::scale(view, glm::vec3(1.1f, 1.1f, 1.0f));
         view = glm::translate(view, glm::vec3(-cursorX, cursorY - height, 0.0f));
+        scale *= 1.1f;
 	}
 	else if (yoffset < 0) {
         glfwGetCursorPos(window, &cursorX, &cursorY);
         view = glm::translate(view, glm::vec3((cursorX), (height - cursorY), 0.0f));
 		view = glm::scale(view, glm::vec3(0.9f, 0.9f, 1.0f));
         view = glm::translate(view, glm::vec3(-(cursorX), cursorY - height, 0.0f));
+        scale *= 0.9f;
 	}
-	
 }
 
 static Vertex* CreateQuad(Vertex* target, float x, float y, float radius) {
@@ -107,6 +108,7 @@ int main(void)
     /* Create a windowed mode window and its OpenGL context */
     width = 960;
     height = 540;
+    scale = 1;
 
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
