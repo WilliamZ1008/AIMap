@@ -12,6 +12,9 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "ElementCoordinator.h"
+#include "Structs.h"
+#include "Config.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -22,10 +25,6 @@ bool isLeftButtonPressed;
 glm::mat4 view;
 float u_Color[] = { 0.1f, 0.8f, 1.0f };
 
-struct Vertex{
-	float x, y, u, v;
-};
-
 void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isLeftButtonPressed) {
         view = glm::translate(view, glm::vec3((xpos - cursorX) / scale, (cursorY - ypos) / scale, 0.0f));
@@ -35,66 +34,38 @@ void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
-		if (action == GLFW_PRESS) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        if (action == GLFW_PRESS) {
             u_Color[0] = 0.9f;
             u_Color[1] = 1.0f;
             u_Color[2] = 0.2f;
-			glfwGetCursorPos(window, &cursorX, &cursorY);
-			isLeftButtonPressed = true;
-		}
-		else if (action == GLFW_RELEASE) {
+            glfwGetCursorPos(window, &cursorX, &cursorY);
+            isLeftButtonPressed = true;
+        }
+        else if (action == GLFW_RELEASE) {
             u_Color[0] = 0.1f;
             u_Color[1] = 0.8f;
             u_Color[2] = 1.0f;
             isLeftButtonPressed = false;
-		}
-	}
+        }
+    }
 }
 
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     if (yoffset > 0) {
         glfwGetCursorPos(window, &cursorX, &cursorY);
         view = glm::translate(view, glm::vec3((cursorX), (height - cursorY), 0.0f));
-		view = glm::scale(view, glm::vec3(1.1f, 1.1f, 1.0f));
+        view = glm::scale(view, glm::vec3(1.1f, 1.1f, 1.0f));
         view = glm::translate(view, glm::vec3(-cursorX, cursorY - height, 0.0f));
         scale *= 1.1f;
-	}
-	else if (yoffset < 0) {
+    }
+    else if (yoffset < 0) {
         glfwGetCursorPos(window, &cursorX, &cursorY);
         view = glm::translate(view, glm::vec3((cursorX), (height - cursorY), 0.0f));
-		view = glm::scale(view, glm::vec3(0.9f, 0.9f, 1.0f));
+        view = glm::scale(view, glm::vec3(0.9f, 0.9f, 1.0f));
         view = glm::translate(view, glm::vec3(-(cursorX), cursorY - height, 0.0f));
         scale *= 0.9f;
-	}
-}
-
-static Vertex* CreateQuad(Vertex* target, float x, float y, float radius) {
-	target->x = x - radius;
-	target->y = y - radius;
-	target->u = -1.0f;
-	target->v = -1.0f;
-	target++;
-
-	target->x = x + radius;
-	target->y = y - radius;
-	target->u =  1.0f;
-	target->v = -1.0f;
-	target++;
-
-	target->x = x + radius;
-	target->y = y + radius;
-	target->u =  1.0f;
-	target->v =  1.0f;
-	target++;
-
-	target->x = x - radius;
-	target->y = y + radius;
-	target->u = -1.0f;
-	target->v =  1.0f;
-    target++;
-
-	return target;
+    }
 }
 
 int main(void)
@@ -138,39 +109,37 @@ int main(void)
     }
 
 
-    const size_t MaxQuadCount = 1000;
-    const size_t MaxVertexCount = MaxQuadCount * 4;
-    const size_t MaxIndexCount = MaxQuadCount * 6;
+    EnableBlend();
 
-    unsigned int indices[MaxIndexCount];
-    unsigned int offset = 0;
-    for (size_t i = 0; i < MaxIndexCount; i += 6) {
-		indices[i + 0] = offset + 0;
-		indices[i + 1] = offset + 1;
-		indices[i + 2] = offset + 2;
+    // vertex
+    VertexArray va_vertex = VertexArray();
 
-		indices[i + 3] = offset + 2;
-		indices[i + 4] = offset + 3;
-		indices[i + 5] = offset + 0;
+    VertexBuffer vb_vertex(MAX_VERTEX_COUNT * sizeof(Vertex));
+    VertexBufferLayout layout_vertex;
+    layout_vertex.Push<float>(2);
+    layout_vertex.Push<float>(2);
 
-		offset += 4;
-	}
+    unsigned int vertex_indices[MAX_VERTEX_INDEX_COUNT];
+    InitQuadIndeces(vertex_indices);
+    Shader shader_vertex("res/shaders/chunk.glsl");
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    VertexArray va = VertexArray();
+    // edge
+    VertexArray va_edge = VertexArray();
 
-    VertexBuffer vb(MaxVertexCount * sizeof(Vertex));
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    layout.Push<float>(2);
+    VertexBuffer vb_edge(MAX_EDGE_COUNT * sizeof(Edge));
+    VertexBufferLayout layout_edge;
+    layout_edge.Push<float>(2);
+    layout_edge.Push<float>(2);
 
-    va.AddBuffer(vb, layout);
-    IndexBuffer ib(indices, MaxIndexCount);
+    unsigned int edge_indices[MAX_EDGE_INDEX_COUNT];
+    InitQuadIndeces(edge_indices);
 
-    Shader shader("res/shaders/chunk.glsl");
-    shader.Bind();
+    Shader shader_edge("res/shaders/edge.glsl");
+
+
+
+
 
     glm::mat4 proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
     view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
@@ -184,6 +153,8 @@ int main(void)
     std::chrono::duration<float> elapsed_seconds;
     float seconds;
 
+    ElementCoordinator element_coordinator;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {   
@@ -194,26 +165,35 @@ int main(void)
 
         model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
         mvp = proj * view * model;
-        shader.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
-        shader.SetUniformMat4f("u_MVP", mvp);
         end = std::chrono::system_clock::now();
         elapsed_seconds = end - start;
         seconds = elapsed_seconds.count();
-        shader.SetUniform1f("iTime", seconds);
-        unsigned int indexCount = 0;
-        std::array<Vertex, MaxVertexCount> vertices;
-        Vertex* target = vertices.data();
 
-        for (int y = 0; y < 5; ++y) {
-            for (int x = 0; x < 8; ++x) {
-				target = CreateQuad(target, x * 120.0f, y * 120.0f, 50.0f);
-                indexCount += 6;
-			}
-        }
+        // edge
+        shader_edge.Bind();
+        va_edge.AddBuffer(vb_edge, layout_edge);
+        IndexBuffer ib_edge(edge_indices, MAX_EDGE_INDEX_COUNT);
+        shader_edge.SetUniformMat4f("u_MVP", mvp);
+        shader_edge.SetUniform1f("iTime", seconds);
+        std::array<Edge, MAX_EDGE_COUNT> edges = element_coordinator.getGLEdges();
+        vb_edge.DynamicBufferSubData(edges.data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge));
+        glDrawElements(GL_TRIANGLES, element_coordinator.getGLEdgeIndexNumber(), GL_UNSIGNED_INT, nullptr);
 
-        vb.DynamicBufferSubData(vertices.data(), vertices.size() * sizeof(Vertex));
+        // vertex
+        shader_vertex.Bind();
+        va_vertex.AddBuffer(vb_vertex, layout_vertex);
+        IndexBuffer ib_vertex(vertex_indices, MAX_VERTEX_INDEX_COUNT);
+        shader_vertex.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
+        shader_vertex.SetUniformMat4f("u_MVP", mvp);
+        shader_vertex.SetUniform1f("iTime", seconds);
+        std::array<Vertex, MAX_VERTEX_COUNT> vertices = element_coordinator.getGLVertices();
+        vb_vertex.DynamicBufferSubData(vertices.data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex));
+        glDrawElements(GL_TRIANGLES, element_coordinator.getGLVertexIndexNumber(), GL_UNSIGNED_INT, nullptr);
 
-        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+
+        // Update
+        element_coordinator.OnUpdate();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

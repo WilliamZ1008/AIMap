@@ -445,6 +445,7 @@
     </None>
     <None Include="res\shaders\chunk.glsl" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="res\shaders\edge.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dependencies\GLEW\include\GL\eglew.h">
@@ -1377,6 +1378,18 @@
     <ClInclude Include="src\VertexBufferLayout.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\ElementCoordinator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Structs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp">
@@ -1422,6 +1435,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\VertexBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ElementCoordinator.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
