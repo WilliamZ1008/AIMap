@@ -128,7 +128,7 @@ void ElementCoordinator::SelectElementByCoord(glm::vec4 coord){
 
 	for (size_t i = 0; i < m_Element_Number; i++) {
 		distanceEach = pow((m_Elements[i].x - coord.x), 2) + pow((m_Elements[i].y - coord.y), 2);
-		if (distanceEach < 1000 && distanceEach < distanceMin) {
+		if (distanceEach < 2000 && distanceEach < distanceMin) {
 			distanceMin = distanceEach;
 			selected = i;
 		}

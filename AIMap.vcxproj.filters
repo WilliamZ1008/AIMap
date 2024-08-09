@@ -1390,6 +1390,9 @@
     <ClInclude Include="src\Utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\QuadShader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp">
@@ -1438,6 +1441,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\ElementCoordinator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\QuadShader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
