@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-class QuadShader {
+class QuadRenderer {
 private:
 	Type m_Type;
 	VertexArray* m_VA;
@@ -27,8 +27,8 @@ private:
 	
 
 public:
-	QuadShader(const std::string& filepath, Type type);
-	~QuadShader();
+	QuadRenderer(const std::string& filepath, Type type);
+	~QuadRenderer();
 
 	void AddBuffer();
 

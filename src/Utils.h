@@ -2,8 +2,11 @@
 
 #include <GLFW/glfw3.h>
 
+#include <chrono>
 #include <math.h>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include "Config.h"
 #include "Structs.h"
 
@@ -92,9 +95,42 @@ static void InitEdgeIndeces(unsigned int vertex_indices[MAX_EDGE_INDEX_COUNT]) {
 	}
 }
 
-
-
 static void EnableBlend() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
+
+static void InitModelViewProj(glm::mat4& model, glm::mat4& view, glm::mat4& proj, int width, int height) {
+	proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
+	view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+	model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+}
+
+static glm::vec4 NDCToCoord(float x, float y, glm::mat4& mvp) {
+	glm::vec4 coord = glm::inverse(mvp) * glm::vec4(x, y, 0.0f, 1.0f);
+	return coord;
+}
+
+
+
+class Timer {
+private:
+	std::chrono::time_point<std::chrono::system_clock> m_Start;
+	std::chrono::time_point<std::chrono::system_clock> m_End;
+	std::chrono::duration<float> m_Elapsed_Seconds;
+
+public:
+	Timer():
+		m_Start(std::chrono::system_clock::now()), m_End(std::chrono::system_clock::now()), m_Elapsed_Seconds(std::chrono::duration<float>(0.0f)){
+
+	}
+	~Timer() {
+
+	};
+
+	float GetSeconds() {
+		m_End = std::chrono::system_clock::now();
+		m_Elapsed_Seconds = m_End - m_Start;
+		return m_Elapsed_Seconds.count();
+	}
+};

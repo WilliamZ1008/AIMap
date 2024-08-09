@@ -298,7 +298,7 @@
     <ClInclude Include="Dependencies\GLFW\include\GLFW\glfw3native.h" />
     <ClInclude Include="src\Config.h" />
     <ClInclude Include="src\IndexBuffer.h" />
-    <ClInclude Include="src\QuadShader.h" />
+    <ClInclude Include="src\QuadRenderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderManager.h" />
     <ClInclude Include="src\Structs.h" />
@@ -610,10 +610,9 @@
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\ElementCoordinator.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
-    <ClCompile Include="src\QuadShader.cpp" />
+    <ClCompile Include="src\QuadRenderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp" />
-    <ClCompile Include="src\vendor\glm\glm.cppm" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />

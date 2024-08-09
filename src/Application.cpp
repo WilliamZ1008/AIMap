@@ -3,16 +3,9 @@
 
 #include <iostream>
 #include <array>
-#include <chrono>
 #include <Windows.h>
 
-
-#include "VertexBuffer.h"
-#include "VertexBufferLayout.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "QuadShader.h"
+#include "QuadRenderer.h"
 #include "ElementCoordinator.h"
 #include "Structs.h"
 #include "Config.h"
@@ -28,15 +21,10 @@ float u_Color[] = { 0.1f, 0.8f, 1.0f };
 glm::mat4 model, view, proj, mvp;
 ElementCoordinator element_coordinator;
 
-glm::vec4 NDCToCoord(float x, float y) {
-    glm::vec4 coord = glm::inverse(mvp) * glm::vec4(x, y, 0.0f, 1.0f);
-    return coord;
-}
-
 void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isLeftButtonPressed) {
         if (element_coordinator.ElementSelected()) {
-            element_coordinator.MoveSelectedElement(NDCToCoord(2 * xpos / width - 1, 2 * (height - ypos) / height - 1));
+            element_coordinator.MoveSelectedElement(NDCToCoord(2 * xpos / width - 1, 2 * (height - ypos) / height - 1, mvp));
         }
     }
 
@@ -53,7 +41,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         case GLFW_PRESS:
             isLeftButtonPressed = true;
             glfwGetCursorPos(window, &cursorX, &cursorY);
-            element_coordinator.SelectElementByCoord(NDCToCoord(2 * cursorX / width - 1, 2 * (height - cursorY) / height - 1));
+            element_coordinator.SelectElementByCoord(NDCToCoord(2 * cursorX / width - 1, 2 * (height - cursorY) / height - 1, mvp));
 
             break;
         case GLFW_RELEASE:
@@ -143,36 +131,21 @@ int main(void)
     if (glewInit() != GLEW_OK) {
         std::cout << "Error!" << std::endl;
     }
-
+    std::cout << glGetString(GL_VERSION) << std::endl;
 
     EnableBlend();
 
     // vertex
-    QuadShader vertex_shader("res/shaders/chunk.glsl", Type::Vertex);
-
-    vertex_shader.PushLayout<float>(2);
-    vertex_shader.PushLayout<float>(2);
-    vertex_shader.PushLayout<float>(1);
-    vertex_shader.AddBuffer();
+    QuadRenderer vertex_renderer("res/shaders/chunk.glsl", Type::Vertex);
 
     // edge
-    QuadShader edge_shader("res/shaders/edge.glsl", Type::Edge);
+    QuadRenderer edge_renderer("res/shaders/edge.glsl", Type::Edge);
 
-    edge_shader.PushLayout<float>(2);
-    edge_shader.PushLayout<float>(2);
-    edge_shader.AddBuffer();
+    // Init model, view, proj
+    InitModelViewProj(model, view, proj, width, height);
 
 
-    proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
-    view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-
-    std::cout << glGetString(GL_VERSION) << std::endl;
-
-    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
-    std::chrono::time_point<std::chrono::system_clock> end;
-    std::chrono::duration<float> elapsed_seconds;
-    float seconds;
-
+    Timer timer;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -182,24 +155,21 @@ int main(void)
         glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+        // mvp
         mvp = proj * view * model;
-        end = std::chrono::system_clock::now();
-        elapsed_seconds = end - start;
-        seconds = elapsed_seconds.count();
-
+ 
         // edge
-        edge_shader.Bind();
-        edge_shader.SetUniformMat4f("u_MVP", mvp);
-        edge_shader.SetUniform1f("iTime", seconds);
-        edge_shader.Draw(element_coordinator.getGLEdges().data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge), element_coordinator.getGLEdgeIndexNumber());
+        edge_renderer.Bind();
+        edge_renderer.SetUniformMat4f("u_MVP", mvp);
+        edge_renderer.SetUniform1f("iTime", timer.GetSeconds());
+        edge_renderer.Draw(element_coordinator.getGLEdges().data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge), element_coordinator.getGLEdgeIndexNumber());
 
         // vertex
-        vertex_shader.Bind();
-        vertex_shader.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
-        vertex_shader.SetUniformMat4f("u_MVP", mvp);
-        vertex_shader.SetUniform1f("iTime", seconds);
-        vertex_shader.Draw(element_coordinator.getGLVertices().data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex), element_coordinator.getGLVertexIndexNumber());
+        vertex_renderer.Bind();
+        vertex_renderer.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
+        vertex_renderer.SetUniformMat4f("u_MVP", mvp);
+        vertex_renderer.SetUniform1f("iTime", timer.GetSeconds());
+        vertex_renderer.Draw(element_coordinator.getGLVertices().data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex), element_coordinator.getGLVertexIndexNumber());
 
         // Update
         element_coordinator.OnUpdate();
