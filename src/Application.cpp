@@ -12,6 +12,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "QuadShader.h"
 #include "ElementCoordinator.h"
 #include "Structs.h"
 #include "Config.h"
@@ -19,14 +20,27 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+GLFWwindow* window;
 int width, height;
 double cursorX, cursorY, scale;
-bool isLeftButtonPressed;
-glm::mat4 view;
+bool isLeftButtonPressed, isRightButtonPressed;
 float u_Color[] = { 0.1f, 0.8f, 1.0f };
+glm::mat4 model, view, proj, mvp;
+ElementCoordinator element_coordinator;
+
+glm::vec4 NDCToCoord(float x, float y) {
+    glm::vec4 coord = glm::inverse(mvp) * glm::vec4(x, y, 0.0f, 1.0f);
+    return coord;
+}
 
 void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isLeftButtonPressed) {
+        if (element_coordinator.ElementSelected()) {
+            element_coordinator.MoveSelectedElement(NDCToCoord(2 * xpos / width - 1, 2 * (height - ypos) / height - 1));
+        }
+    }
+
+    if (isRightButtonPressed) {
         view = glm::translate(view, glm::vec3((xpos - cursorX) / scale, (cursorY - ypos) / scale, 0.0f));
         cursorX = xpos;
         cursorY = ypos;
@@ -35,19 +49,39 @@ void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (button == GLFW_MOUSE_BUTTON_LEFT) {
-        if (action == GLFW_PRESS) {
+        switch (action) {
+        case GLFW_PRESS:
+            isLeftButtonPressed = true;
+            glfwGetCursorPos(window, &cursorX, &cursorY);
+            element_coordinator.SelectElementByCoord(NDCToCoord(2 * cursorX / width - 1, 2 * (height - cursorY) / height - 1));
+
+            break;
+        case GLFW_RELEASE:
+            isLeftButtonPressed = false;
+            break;
+        default:
+            break;
+        }
+    }
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        switch (action) {
+        case GLFW_PRESS:
             u_Color[0] = 0.9f;
             u_Color[1] = 1.0f;
             u_Color[2] = 0.2f;
             glfwGetCursorPos(window, &cursorX, &cursorY);
-            isLeftButtonPressed = true;
-        }
-        else if (action == GLFW_RELEASE) {
+            isRightButtonPressed = true;
+            break;
+        case GLFW_RELEASE:
             u_Color[0] = 0.1f;
             u_Color[1] = 0.8f;
             u_Color[2] = 1.0f;
-            isLeftButtonPressed = false;
+            isRightButtonPressed = false;
+            break;
+        default:
+            break;
         }
+    
     }
 }
 
@@ -70,7 +104,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 
 int main(void)
 {
-    GLFWwindow* window;
+
 
     /* Initialize the library */
     if (!glfwInit())
@@ -95,10 +129,12 @@ int main(void)
     glfwSetWindowMonitor(window, NULL, (max_width / 2) - (width / 2), (max_hieght / 2) - (height / 2), width, height, GLFW_DONT_CARE);
 
     isLeftButtonPressed = false;
+    isRightButtonPressed = false;
 
     glfwSetCursorPosCallback(window, CursorPositionCallback);
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetScrollCallback(window, ScrollCallback);
+
 
 
     /* Make the window's context current */
@@ -112,39 +148,23 @@ int main(void)
     EnableBlend();
 
     // vertex
-    VertexArray va_vertex = VertexArray();
+    QuadShader vertex_shader("res/shaders/chunk.glsl", Type::Vertex);
 
-    VertexBuffer vb_vertex(MAX_VERTEX_COUNT * sizeof(Vertex));
-    VertexBufferLayout layout_vertex;
-    layout_vertex.Push<float>(2);
-    layout_vertex.Push<float>(2);
-
-    unsigned int vertex_indices[MAX_VERTEX_INDEX_COUNT];
-    InitQuadIndeces(vertex_indices);
-    Shader shader_vertex("res/shaders/chunk.glsl");
-
+    vertex_shader.PushLayout<float>(2);
+    vertex_shader.PushLayout<float>(2);
+    vertex_shader.PushLayout<float>(1);
+    vertex_shader.AddBuffer();
 
     // edge
-    VertexArray va_edge = VertexArray();
+    QuadShader edge_shader("res/shaders/edge.glsl", Type::Edge);
 
-    VertexBuffer vb_edge(MAX_EDGE_COUNT * sizeof(Edge));
-    VertexBufferLayout layout_edge;
-    layout_edge.Push<float>(2);
-    layout_edge.Push<float>(2);
-
-    unsigned int edge_indices[MAX_EDGE_INDEX_COUNT];
-    InitQuadIndeces(edge_indices);
-
-    Shader shader_edge("res/shaders/edge.glsl");
+    edge_shader.PushLayout<float>(2);
+    edge_shader.PushLayout<float>(2);
+    edge_shader.AddBuffer();
 
 
-
-
-
-    glm::mat4 proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
+    proj = glm::ortho(0.0f, float(width), 0.0f, float(height), -1.0f, 1.0f);
     view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-    glm::mat4 model;
-    glm::mat4 mvp;
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
@@ -153,7 +173,6 @@ int main(void)
     std::chrono::duration<float> elapsed_seconds;
     float seconds;
 
-    ElementCoordinator element_coordinator;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -170,27 +189,17 @@ int main(void)
         seconds = elapsed_seconds.count();
 
         // edge
-        shader_edge.Bind();
-        va_edge.AddBuffer(vb_edge, layout_edge);
-        IndexBuffer ib_edge(edge_indices, MAX_EDGE_INDEX_COUNT);
-        shader_edge.SetUniformMat4f("u_MVP", mvp);
-        shader_edge.SetUniform1f("iTime", seconds);
-        std::array<Edge, MAX_EDGE_COUNT> edges = element_coordinator.getGLEdges();
-        vb_edge.DynamicBufferSubData(edges.data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge));
-        glDrawElements(GL_TRIANGLES, element_coordinator.getGLEdgeIndexNumber(), GL_UNSIGNED_INT, nullptr);
+        edge_shader.Bind();
+        edge_shader.SetUniformMat4f("u_MVP", mvp);
+        edge_shader.SetUniform1f("iTime", seconds);
+        edge_shader.Draw(element_coordinator.getGLEdges().data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge), element_coordinator.getGLEdgeIndexNumber());
 
         // vertex
-        shader_vertex.Bind();
-        va_vertex.AddBuffer(vb_vertex, layout_vertex);
-        IndexBuffer ib_vertex(vertex_indices, MAX_VERTEX_INDEX_COUNT);
-        shader_vertex.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
-        shader_vertex.SetUniformMat4f("u_MVP", mvp);
-        shader_vertex.SetUniform1f("iTime", seconds);
-        std::array<Vertex, MAX_VERTEX_COUNT> vertices = element_coordinator.getGLVertices();
-        vb_vertex.DynamicBufferSubData(vertices.data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex));
-        glDrawElements(GL_TRIANGLES, element_coordinator.getGLVertexIndexNumber(), GL_UNSIGNED_INT, nullptr);
-
-
+        vertex_shader.Bind();
+        vertex_shader.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
+        vertex_shader.SetUniformMat4f("u_MVP", mvp);
+        vertex_shader.SetUniform1f("iTime", seconds);
+        vertex_shader.Draw(element_coordinator.getGLVertices().data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex), element_coordinator.getGLVertexIndexNumber());
 
         // Update
         element_coordinator.OnUpdate();

@@ -3,14 +3,17 @@
 
 layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 texCoord;
+layout(location = 2) in float selected;
 
 out vec2 fragCoord;
+out float isSelected;
 
 uniform mat4 u_MVP;
 
 void main() {
 	gl_Position = u_MVP * position;
 	fragCoord = texCoord;
+	isSelected = selected;
 };
 
 #shader fragment
@@ -19,6 +22,7 @@ void main() {
 layout(location = 0) out vec4 color;
 
 in vec2 fragCoord;
+in float isSelected;
 
 out vec4 fragColor;
 
@@ -71,4 +75,7 @@ void main() {
 	vec3 horBeam = vec3(beamWidth);
 	fragColor.rgb = (horBeam)*horColour*u_Color;
 	fragColor.a = smoothstep(0.05, 0.1, (fragColor.r + fragColor.g + fragColor.b)/3);
+	if (isSelected==1.0) {
+		fragColor.rgb *= 3.0;
+	}
 };

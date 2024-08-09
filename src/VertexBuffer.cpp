@@ -1,6 +1,8 @@
-#include <GL/glew.h>
-
 #include "VertexBuffer.h"
+#include <stdio.h>
+
+VertexBuffer::VertexBuffer(){
+}
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size){
     // Static draw is used for data that changes infrequently
@@ -30,7 +32,7 @@ void VertexBuffer::Unbind() const{
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexBuffer::DynamicBufferSubData(const void* data, unsigned int size){
+void VertexBuffer::DynamicBufferSubData(const void* data, GLsizeiptr size){
 	glBindBuffer(GL_ARRAY_BUFFER, m_Renderer_ID);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 }

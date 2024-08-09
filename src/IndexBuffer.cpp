@@ -4,6 +4,10 @@
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 
+IndexBuffer::IndexBuffer()
+{
+}
+
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count) :m_Count(count) {
     ASSERT(sizeof(unsigned int) == sizeof(GLuint));
 

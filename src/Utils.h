@@ -7,29 +7,33 @@
 #include "Config.h"
 #include "Structs.h"
 
-static Vertex* CreateQuad(Vertex* target, float x, float y, float radius) {
+static Vertex* CreateQuad(Vertex* target, float x, float y, float radius, char selected) {
 	target->x = x - radius;
 	target->y = y - radius;
 	target->u = -1.0f;
 	target->v = -1.0f;
+	target->s = selected;
 	target++;
 
 	target->x = x + radius;
 	target->y = y - radius;
 	target->u = 1.0f;
 	target->v = -1.0f;
+	target->s = selected;
 	target++;
 
 	target->x = x + radius;
 	target->y = y + radius;
 	target->u = 1.0f;
 	target->v = 1.0f;
+	target->s = selected;
 	target++;
 
 	target->x = x - radius;
 	target->y = y + radius;
 	target->u = -1.0f;
 	target->v = 1.0f;
+	target->s = selected;
 	target++;
 
 	return target;
@@ -67,16 +71,16 @@ static Edge* CreateEdge(Edge* target, float x1, float y1, float x2, float y2, fl
 	return target;
 }
 
-static void InitQuadIndeces(unsigned int vertex_indices[MAX_VERTEX_INDEX_COUNT]) {
+static void InitQuadIndeces(unsigned int *indices, unsigned int length) {
 	unsigned int offset = 0;
-	for (size_t i = 0; i < MAX_VERTEX_INDEX_COUNT; i += 6) {
-		vertex_indices[i + 0] = offset + 0;
-		vertex_indices[i + 1] = offset + 1;
-		vertex_indices[i + 2] = offset + 2;
+	for (size_t i = 0; i < length; i += 6) {
+		indices[i + 0] = offset + 0;
+		indices[i + 1] = offset + 1;
+		indices[i + 2] = offset + 2;
 
-		vertex_indices[i + 3] = offset + 2;
-		vertex_indices[i + 4] = offset + 3;
-		vertex_indices[i + 5] = offset + 0;
+		indices[i + 3] = offset + 2;
+		indices[i + 4] = offset + 3;
+		indices[i + 5] = offset + 0;
 
 		offset += 4;
 	}
