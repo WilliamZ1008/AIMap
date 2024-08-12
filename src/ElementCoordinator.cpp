@@ -2,46 +2,43 @@
 
 
 ElementCoordinator::ElementCoordinator(){
+	DataManager data_manager("res/data/aimap.db");
+
+
 	m_Element_Number = 5;
 	
 	// Initialize elements
-	m_Elements[0] = Element{100.5f, 350.6f};
-	m_Elements[1] = Element{156.6f, 200.3f};
-	m_Elements[2] = Element{50.9f, 586.8f};
-	m_Elements[3] = Element{100.3f, 10.8f};
-	m_Elements[4] = Element{150.9f, 566.3f};
+	m_Elements[0] = Element{100.5f, 350.6f, FIELD};
+	m_Elements[1] = Element{156.6f, 200.3f, FIELD };
+	m_Elements[2] = Element{50.9f, 586.8f, FIELD };
+	m_Elements[3] = Element{100.3f, 10.8f, FIELD };
+	m_Elements[4] = Element{150.9f, 566.3f, FIELD };
 
 	// Initialize edges
-	for (size_t i = 0; i < m_Element_Number; i++){
-		for (size_t j = 0; j < m_Element_Number; j++){
-			m_Edges[i][j] = false;
-		}
-
-	}
-
 	m_Edge_Number = 5;
 
-	m_Edges[0][1] = true;
-	m_Edges[1][0] = true;
+	AddEdge(0, 1);
+	AddEdge(0, 2);
+	AddEdge(1, 2);
+	AddEdge(0, 3);
+	AddEdge(0, 4);
 
-	m_Edges[0][2] = true;
-	m_Edges[2][0] = true;
-
-	m_Edges[1][2] = true;
-	m_Edges[2][2] = true;
-
-	m_Edges[0][3] = true;
-	m_Edges[3][0] = true;
-	
-	m_Edges[0][4] = true;
-	m_Edges[4][0] = true;
 
 	// Initialize selected vertex
-	m_Selected_Vertex = m_Element_Number;
-
+	m_Selected_Vertex = MAX_QUAD_COUNT;
 }
 
 ElementCoordinator::~ElementCoordinator(){
+
+}
+
+void ElementCoordinator::AddEdge(unsigned int vertex_1, unsigned int vertex_2){
+	m_Edges[vertex_1].insert(vertex_2);
+	m_Edges[vertex_2].insert(vertex_1);
+}
+
+bool ElementCoordinator::CheckEdge(unsigned int vertex_1, unsigned int vertex_2){
+	return m_Edges[vertex_1].find(vertex_2)!= m_Edges[vertex_1].end();
 }
 
 void ElementCoordinator::Spring(float c1, float c2, float c3, float c4){
@@ -53,7 +50,7 @@ void ElementCoordinator::Spring(float c1, float c2, float c3, float c4){
 			x2 = m_Elements[j].x;
 			y2 = m_Elements[j].y;
 			d = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-			if (m_Edges[i][j]) {
+			if (CheckEdge(i, j)) {
 				// Adjacent
 				force = c1 * log(d / c2);
 			}
@@ -79,23 +76,31 @@ void ElementCoordinator::OnUpdate(){
 	Spring();
 }
 
-unsigned int ElementCoordinator::getGLVertexNumber(){
+unsigned int ElementCoordinator::GetGLVertexNumber(){
 	return m_Element_Number * 4;
 }
 
-unsigned int ElementCoordinator::getGLEdgeNumber(){
+unsigned int ElementCoordinator::GetGLEdgeNumber(){
 	return m_Edge_Number * 4;
 }
 
-unsigned int ElementCoordinator::getGLVertexIndexNumber(){
+unsigned int ElementCoordinator::GetGLVertexSize(){
+	return m_Element_Number * 4 * sizeof(Vertex);
+}
+
+unsigned int ElementCoordinator::GetGLEdgeSize(){
+	return m_Edge_Number * 4 * sizeof(Edge);
+}
+
+unsigned int ElementCoordinator::GetGLVertexIndexNumber(){
 	return m_Element_Number * 6;
 }
 
-unsigned int ElementCoordinator::getGLEdgeIndexNumber(){
+unsigned int ElementCoordinator::GetGLEdgeIndexNumber(){
 	return m_Edge_Number * 6;
 }
 
-std::array<Vertex, MAX_VERTEX_COUNT> ElementCoordinator::getGLVertices(){	
+std::array<Vertex, MAX_VERTEX_COUNT> ElementCoordinator::GetGLVertices(){	
 	std::array<Vertex, MAX_VERTEX_COUNT> vertices;
 	Vertex* target = vertices.data();
 
@@ -105,13 +110,13 @@ std::array<Vertex, MAX_VERTEX_COUNT> ElementCoordinator::getGLVertices(){
 	return vertices;
 }
 
-std::array<Edge, MAX_EDGE_COUNT> ElementCoordinator::getGLEdges(){
+std::array<Edge, MAX_EDGE_COUNT> ElementCoordinator::GetGLEdges(){
 	std::array<Edge, MAX_EDGE_COUNT> edges;
 	Edge* target = edges.data();
 
 	for (size_t i = 0; i < m_Element_Number; i++){
 		for (size_t j = i + 1; j < m_Element_Number; j++) {
-			if (m_Edges[i][j]) {
+			if (CheckEdge(i, j)) {
 				target = CreateEdge(target, m_Elements[i].x, m_Elements[i].y, m_Elements[j].x, m_Elements[j].y, 5.0f);
 			}
 		}
@@ -121,14 +126,14 @@ std::array<Edge, MAX_EDGE_COUNT> ElementCoordinator::getGLEdges(){
 }
 
 void ElementCoordinator::SelectElementByCoord(glm::vec4 coord){
-	float distanceMin = 99999999.0;
+	float distanceMin = MAX_SELECT_DISTANCE_SQUARED;
 	float distanceEach;
 
 	unsigned int selected = m_Element_Number;
 
 	for (size_t i = 0; i < m_Element_Number; i++) {
 		distanceEach = pow((m_Elements[i].x - coord.x), 2) + pow((m_Elements[i].y - coord.y), 2);
-		if (distanceEach < 2000 && distanceEach < distanceMin) {
+		if (distanceEach < MAX_SELECT_DISTANCE_SQUARED && distanceEach < distanceMin) {
 			distanceMin = distanceEach;
 			selected = i;
 		}
@@ -145,5 +150,5 @@ void ElementCoordinator::MoveSelectedElement(glm::vec4 coord) {
 
 bool ElementCoordinator::ElementSelected()
 {
-	return m_Selected_Vertex!=m_Element_Number;
+	return m_Selected_Vertex!= MAX_QUAD_COUNT;
 }

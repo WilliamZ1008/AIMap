@@ -446,6 +446,7 @@
     <None Include="res\shaders\chunk.glsl" />
     <None Include="CONTRIBUTING.md" />
     <None Include="res\shaders\edge.glsl" />
+    <None Include="res\data\aimap.db" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dependencies\GLEW\include\GL\eglew.h">
@@ -1393,6 +1394,12 @@
     <ClInclude Include="src\QuadRenderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Dependencies\SQLite\include\sqlite3.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DataManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp">
@@ -1441,6 +1448,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\QuadRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\SQLite\include\sqlite3.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

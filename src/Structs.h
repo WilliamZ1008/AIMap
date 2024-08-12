@@ -5,7 +5,7 @@ struct Vertex {
 };
 
 struct Element {
-	float x, y;
+	float x, y, t;
 };
 
 struct Edge {

@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\SQLite\include;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;src\vendor;$(SolutionDir)Dependencies\SQLite\include;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,6 +147,7 @@
     <None Include="Dependencies\GLEW\doc\wglew.html" />
     <None Include="LICENSE" />
     <None Include="README.md" />
+    <None Include="res\data\aimap.db" />
     <None Include="res\shaders\chunk.glsl" />
     <None Include="res\shaders\chunk.glsl.vert" />
     <None Include="res\shaders\edge.glsl" />
@@ -296,7 +297,9 @@
     <ClInclude Include="Dependencies\GLEW\include\GL\wglew.h" />
     <ClInclude Include="Dependencies\GLFW\include\GLFW\glfw3.h" />
     <ClInclude Include="Dependencies\GLFW\include\GLFW\glfw3native.h" />
+    <ClInclude Include="Dependencies\SQLite\include\sqlite3.h" />
     <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\DataManager.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\QuadRenderer.h" />
     <ClInclude Include="src\Shader.h" />
@@ -607,7 +610,9 @@
     <ClInclude Include="src\ElementCoordinator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Dependencies\SQLite\include\sqlite3.c" />
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\DataManager.cpp" />
     <ClCompile Include="src\ElementCoordinator.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\QuadRenderer.cpp" />

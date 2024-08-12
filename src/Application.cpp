@@ -7,8 +7,6 @@
 
 #include "QuadRenderer.h"
 #include "ElementCoordinator.h"
-#include "Structs.h"
-#include "Config.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -123,8 +121,6 @@ int main(void)
     glfwSetMouseButtonCallback(window, MouseButtonCallback);
     glfwSetScrollCallback(window, ScrollCallback);
 
-
-
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
@@ -135,16 +131,16 @@ int main(void)
 
     EnableBlend();
 
-    // vertex
+    // Vertex
     QuadRenderer vertex_renderer("res/shaders/chunk.glsl", Type::Vertex);
 
-    // edge
+    // Edge
     QuadRenderer edge_renderer("res/shaders/edge.glsl", Type::Edge);
 
     // Init model, view, proj
     InitModelViewProj(model, view, proj, width, height);
 
-
+    // Timer
     Timer timer;
 
     /* Loop until the user closes the window */
@@ -155,21 +151,22 @@ int main(void)
         glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // mvp
-        mvp = proj * view * model;
+        // MVP
+        //mvp = proj * view * model;
+        mvp = proj * view;
  
-        // edge
+        // Edge
         edge_renderer.Bind();
         edge_renderer.SetUniformMat4f("u_MVP", mvp);
         edge_renderer.SetUniform1f("iTime", timer.GetSeconds());
-        edge_renderer.Draw(element_coordinator.getGLEdges().data(), element_coordinator.getGLEdgeNumber() * sizeof(Edge), element_coordinator.getGLEdgeIndexNumber());
+        edge_renderer.Draw(element_coordinator.GetGLEdges().data(), element_coordinator.GetGLEdgeSize(), element_coordinator.GetGLEdgeIndexNumber());
 
-        // vertex
+        // Vertex
         vertex_renderer.Bind();
         vertex_renderer.SetUniform3f("u_Color", u_Color[0], u_Color[1], u_Color[2]);
         vertex_renderer.SetUniformMat4f("u_MVP", mvp);
         vertex_renderer.SetUniform1f("iTime", timer.GetSeconds());
-        vertex_renderer.Draw(element_coordinator.getGLVertices().data(), element_coordinator.getGLVertexNumber() * sizeof(Vertex), element_coordinator.getGLVertexIndexNumber());
+        vertex_renderer.Draw(element_coordinator.GetGLVertices().data(), element_coordinator.GetGLVertexSize(), element_coordinator.GetGLVertexIndexNumber());
 
         // Update
         element_coordinator.OnUpdate();

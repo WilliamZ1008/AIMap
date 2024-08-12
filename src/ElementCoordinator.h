@@ -1,8 +1,10 @@
 #pragma once
 
 #include <array>
+#include <set>
 #include <math.h>
 
+#include "DataManager.h"
 #include "glm/glm.hpp"
 #include "Structs.h"
 #include "Config.h"
@@ -16,20 +18,25 @@ private:
 	unsigned int m_Edge_Number;
 	unsigned int m_Selected_Vertex;
 	std::array<Element, MAX_QUAD_COUNT> m_Elements;
-	std::array<std::array<bool, MAX_QUAD_COUNT>, MAX_QUAD_COUNT> m_Edges;
+	std::array<std::set<unsigned int>, MAX_QUAD_COUNT> m_Edges;
 	void Spring(float c1 = 2, float c2 = 100, float c3 = 100000, float c4 = 1);
 
 public:
 	ElementCoordinator();
 	~ElementCoordinator();
 
+	void AddEdge(unsigned int vertex_1, unsigned int vertex_2);
+	bool CheckEdge(unsigned int vertex_1, unsigned int vertex_2);
+
 	void OnUpdate();
-	unsigned int getGLVertexNumber();
-	unsigned int getGLEdgeNumber();
-	unsigned int getGLVertexIndexNumber();
-	unsigned int getGLEdgeIndexNumber();
-	std::array<Vertex, MAX_VERTEX_COUNT> getGLVertices();
-	std::array<Edge, MAX_EDGE_COUNT> getGLEdges();
+	unsigned int GetGLVertexNumber();
+	unsigned int GetGLEdgeNumber();
+	unsigned int GetGLVertexSize();
+	unsigned int GetGLEdgeSize();
+	unsigned int GetGLVertexIndexNumber();
+	unsigned int GetGLEdgeIndexNumber();
+	std::array<Vertex, MAX_VERTEX_COUNT> GetGLVertices();
+	std::array<Edge, MAX_EDGE_COUNT> GetGLEdges();
 
 	void SelectElementByCoord(glm::vec4 coord);
 	void MoveSelectedElement(glm::vec4 coord);
