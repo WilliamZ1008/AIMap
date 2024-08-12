@@ -8,6 +8,7 @@
 
 #define MAX_SELECT_DISTANCE_SQUARED 2000
 
-#define FIELD 0.0f
-#define SUB_FIELD 1.0f
-#define MODEL 2.0f
+#define ROOT 0
+#define FIELD 1
+#define SUB_FIELD 2
+#define MODEL 3

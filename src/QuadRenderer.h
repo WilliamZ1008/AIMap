@@ -44,5 +44,8 @@ public:
 
 	template<>
 	void PushLayout<float>(unsigned int count);
+
+	template<>
+	void PushLayout<unsigned int>(unsigned int count);
 };
 

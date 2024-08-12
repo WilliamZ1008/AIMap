@@ -4,25 +4,12 @@
 ElementCoordinator::ElementCoordinator(){
 	DataManager data_manager("res/data/aimap.db");
 
+	data_manager.LoadElements();
 
-	m_Element_Number = 5;
-	
-	// Initialize elements
-	m_Elements[0] = Element{100.5f, 350.6f, FIELD};
-	m_Elements[1] = Element{156.6f, 200.3f, FIELD };
-	m_Elements[2] = Element{50.9f, 586.8f, FIELD };
-	m_Elements[3] = Element{100.3f, 10.8f, FIELD };
-	m_Elements[4] = Element{150.9f, 566.3f, FIELD };
-
-	// Initialize edges
-	m_Edge_Number = 5;
-
-	AddEdge(0, 1);
-	AddEdge(0, 2);
-	AddEdge(1, 2);
-	AddEdge(0, 3);
-	AddEdge(0, 4);
-
+	m_Element_Number = data_manager.GetElementNumber();
+	m_Edge_Number = data_manager.GetEdgeNumber();
+	m_Elements = data_manager.GetElements();
+	m_Edges = data_manager.GetEdges();
 
 	// Initialize selected vertex
 	m_Selected_Vertex = MAX_QUAD_COUNT;
@@ -30,11 +17,6 @@ ElementCoordinator::ElementCoordinator(){
 
 ElementCoordinator::~ElementCoordinator(){
 
-}
-
-void ElementCoordinator::AddEdge(unsigned int vertex_1, unsigned int vertex_2){
-	m_Edges[vertex_1].insert(vertex_2);
-	m_Edges[vertex_2].insert(vertex_1);
 }
 
 bool ElementCoordinator::CheckEdge(unsigned int vertex_1, unsigned int vertex_2){
@@ -62,9 +44,11 @@ void ElementCoordinator::Spring(float c1, float c2, float c3, float c4){
 			force_x = force * cos(theta);
 			force_y = force * sin(theta);
 
-			m_Elements[i].x += c4 * force_x;
+			if (m_Elements[i].t) {
+				m_Elements[i].x += c4 * force_x;
+				m_Elements[i].y += c4 * force_y;
+			}
 			m_Elements[j].x -= c4 * force_x;
-			m_Elements[i].y += c4 * force_y;
 			m_Elements[j].y -= c4 * force_y;
 		}
 	}
@@ -105,7 +89,21 @@ std::array<Vertex, MAX_VERTEX_COUNT> ElementCoordinator::GetGLVertices(){
 	Vertex* target = vertices.data();
 
 	for (size_t i = 0; i < m_Element_Number; i++){
-		target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 50.0f, (float)i==m_Selected_Vertex);
+		switch (m_Elements[i].t) {
+		case ROOT:
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 50.0f, (float)i==m_Selected_Vertex);
+			break;
+		case FIELD:
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 30.9f, (float)i==m_Selected_Vertex);
+			break;
+		case SUB_FIELD:
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 19.1f, (float)i==m_Selected_Vertex);
+			break;
+		case MODEL:
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 11.8f, (float)i==m_Selected_Vertex);
+			break;
+		}
+		
 	}
 	return vertices;
 }

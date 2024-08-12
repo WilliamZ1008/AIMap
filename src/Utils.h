@@ -10,7 +10,7 @@
 #include "Config.h"
 #include "Structs.h"
 
-static Vertex* CreateQuad(Vertex* target, float x, float y, float radius, char selected) {
+static Vertex* CreateQuad(Vertex* target, float x, float y, float radius, float selected) {
 	target->x = x - radius;
 	target->y = y - radius;
 	target->u = -1.0f;

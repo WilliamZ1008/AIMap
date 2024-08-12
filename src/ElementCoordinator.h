@@ -25,7 +25,6 @@ public:
 	ElementCoordinator();
 	~ElementCoordinator();
 
-	void AddEdge(unsigned int vertex_1, unsigned int vertex_2);
 	bool CheckEdge(unsigned int vertex_1, unsigned int vertex_2);
 
 	void OnUpdate();

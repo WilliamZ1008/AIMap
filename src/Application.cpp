@@ -11,6 +11,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+
 GLFWwindow* window;
 int width, height;
 double cursorX, cursorY, scale;
@@ -88,10 +89,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
     }
 }
 
-int main(void)
-{
-
-
+int main(void){
     /* Initialize the library */
     if (!glfwInit())
         return -1;

@@ -3,7 +3,6 @@
 QuadRenderer::QuadRenderer(const std::string& filepath, Type type)
     :m_Type(type), m_VA(), m_VB(), m_Layout(), m_IB(), m_Shader() {
     unsigned int* indeces;
-
     switch (type) {
     case Type::Vertex:
         m_VA = new VertexArray();
@@ -66,8 +65,14 @@ void QuadRenderer::SetUniformMat4f(const std::string& name, const glm::mat4& mat
 
 void QuadRenderer::Bind(){
     m_Shader->Bind();
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << err << std::endl;
+    }
 	m_VA->Bind();
+
 	m_IB->Bind();
+
 }
 
 void QuadRenderer::Draw(const void* data, unsigned int elementSize, unsigned int indexNumber) {
@@ -83,4 +88,9 @@ void QuadRenderer::PushLayout(unsigned int count) {
 template<>
 void QuadRenderer::PushLayout<float>(unsigned int count) {
     m_Layout->Push<float>(count);
+}
+
+template<>
+void QuadRenderer::PushLayout<unsigned int>(unsigned int count) {
+    m_Layout->Push<unsigned int>(count);
 }

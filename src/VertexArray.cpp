@@ -20,7 +20,15 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
 	for (unsigned int i = 0; i < elements.size(); i++) {
 		const auto& element = elements[i];
 		glEnableVertexAttribArray(i);
-		glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(), (const void*)offset);
+		switch (element.type) {
+			case GL_FLOAT: 
+				glVertexAttribPointer(i, element.count, GL_FLOAT, element.normalized, layout.GetStride(), (const void*)offset);
+				break;
+			case GL_UNSIGNED_INT:
+				glVertexAttribIPointer(i, element.count, GL_UNSIGNED_INT, layout.GetStride(), (const void*)offset);
+				break;
+		}
+		//glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(), (const void*)offset);
 		offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
 	}
 
