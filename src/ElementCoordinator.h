@@ -16,8 +16,9 @@ class ElementCoordinator {
 private:
 	unsigned int m_Element_Number;
 	unsigned int m_Edge_Number;
-	unsigned int m_Selected_Vertex;
+	unsigned int m_Selected_Element_Index;
 	std::array<Element, MAX_QUAD_COUNT> m_Elements;
+	std::array<ElementInfo, MAX_QUAD_COUNT> m_Element_Infomation;
 	std::array<std::set<unsigned int>, MAX_QUAD_COUNT> m_Edges;
 	void Spring(float c1 = 2, float c2 = 100, float c3 = 100000, float c4 = 1);
 
@@ -36,6 +37,7 @@ public:
 	unsigned int GetGLEdgeIndexNumber();
 	std::array<Vertex, MAX_VERTEX_COUNT> GetGLVertices();
 	std::array<Edge, MAX_EDGE_COUNT> GetGLEdges();
+	ElementInfo GetSelectedElementInfo();
 
 	void SelectElementByCoord(glm::vec4 coord);
 	void MoveSelectedElement(glm::vec4 coord);

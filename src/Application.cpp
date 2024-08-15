@@ -7,6 +7,7 @@
 
 #include "QuadRenderer.h"
 #include "ElementCoordinator.h"
+#include "PopupManager.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -19,6 +20,7 @@ bool isLeftButtonPressed, isRightButtonPressed;
 float u_Color[] = { 0.1f, 0.8f, 1.0f };
 glm::mat4 model, view, proj, mvp;
 ElementCoordinator element_coordinator;
+PopupManager* popup_manager;
 
 void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
     if (isLeftButtonPressed) {
@@ -41,7 +43,12 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             isLeftButtonPressed = true;
             glfwGetCursorPos(window, &cursorX, &cursorY);
             element_coordinator.SelectElementByCoord(NDCToCoord(2 * cursorX / width - 1, 2 * (height - cursorY) / height - 1, mvp));
-
+            if (element_coordinator.ElementSelected()) {
+                popup_manager->DisplayElementInfo(element_coordinator.GetSelectedElementInfo());
+            }
+            else {
+                popup_manager->HideElementInfo();
+            }
             break;
         case GLFW_RELEASE:
             isLeftButtonPressed = false;
@@ -141,6 +148,9 @@ int main(void){
     // Timer
     Timer timer;
 
+    // Popup
+    popup_manager = new PopupManager(window);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {   
@@ -148,6 +158,8 @@ int main(void){
         /* Render here */
         glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        popup_manager->StartOfLoop();
 
         // MVP
         //mvp = proj * view * model;
@@ -168,6 +180,8 @@ int main(void){
 
         // Update
         element_coordinator.OnUpdate();
+
+        popup_manager->EndOfLoop();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

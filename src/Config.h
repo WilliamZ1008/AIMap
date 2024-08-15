@@ -12,3 +12,8 @@
 #define FIELD 1
 #define SUB_FIELD 2
 #define MODEL 3
+
+#define ROOT_RADIUS 75.0f
+#define FIELD_RADIUS 46.35f
+#define SUB_FIELD_RADIUS 28.64f
+#define MODEL_RADIUS 17.70f

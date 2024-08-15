@@ -1,6 +1,5 @@
 #include "ElementCoordinator.h"
 
-
 ElementCoordinator::ElementCoordinator(){
 	DataManager data_manager("res/data/aimap.db");
 
@@ -9,10 +8,11 @@ ElementCoordinator::ElementCoordinator(){
 	m_Element_Number = data_manager.GetElementNumber();
 	m_Edge_Number = data_manager.GetEdgeNumber();
 	m_Elements = data_manager.GetElements();
+	m_Element_Infomation = data_manager.GetElementInfomation();
 	m_Edges = data_manager.GetEdges();
 
 	// Initialize selected vertex
-	m_Selected_Vertex = MAX_QUAD_COUNT;
+	m_Selected_Element_Index = MAX_QUAD_COUNT;
 }
 
 ElementCoordinator::~ElementCoordinator(){
@@ -91,16 +91,16 @@ std::array<Vertex, MAX_VERTEX_COUNT> ElementCoordinator::GetGLVertices(){
 	for (size_t i = 0; i < m_Element_Number; i++){
 		switch (m_Elements[i].t) {
 		case ROOT:
-			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 50.0f, (float)i==m_Selected_Vertex);
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, ROOT_RADIUS, (float)i==m_Selected_Element_Index);
 			break;
 		case FIELD:
-			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 30.9f, (float)i==m_Selected_Vertex);
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, FIELD_RADIUS, (float)i==m_Selected_Element_Index);
 			break;
 		case SUB_FIELD:
-			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 19.1f, (float)i==m_Selected_Vertex);
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, SUB_FIELD_RADIUS, (float)i==m_Selected_Element_Index);
 			break;
 		case MODEL:
-			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, 11.8f, (float)i==m_Selected_Vertex);
+			target = CreateQuad(target, m_Elements[i].x, m_Elements[i].y, MODEL_RADIUS, (float)i==m_Selected_Element_Index);
 			break;
 		}
 		
@@ -123,6 +123,10 @@ std::array<Edge, MAX_EDGE_COUNT> ElementCoordinator::GetGLEdges(){
 	return edges;
 }
 
+ElementInfo ElementCoordinator::GetSelectedElementInfo(){
+	return m_Element_Infomation[m_Selected_Element_Index];
+}
+
 void ElementCoordinator::SelectElementByCoord(glm::vec4 coord){
 	float distanceMin = MAX_SELECT_DISTANCE_SQUARED;
 	float distanceEach;
@@ -137,16 +141,16 @@ void ElementCoordinator::SelectElementByCoord(glm::vec4 coord){
 		}
 	}
 
-	m_Selected_Vertex = selected;
-	//std::cout << m_Selected_Vertex << std::endl;
+	m_Selected_Element_Index = selected;
+	//std::cout << m_Selected_Element_Index << std::endl;
 }
 
 void ElementCoordinator::MoveSelectedElement(glm::vec4 coord) {
-	m_Elements[m_Selected_Vertex].x = coord.x;
-	m_Elements[m_Selected_Vertex].y = coord.y;
+	m_Elements[m_Selected_Element_Index].x = coord.x;
+	m_Elements[m_Selected_Element_Index].y = coord.y;
 }
 
 bool ElementCoordinator::ElementSelected()
 {
-	return m_Selected_Vertex!= MAX_QUAD_COUNT;
+	return m_Selected_Element_Index!= m_Element_Number;
 }
